@@ -15,7 +15,9 @@ end
 Then /I should see "(.*)" before "(.*)"/ do |e1, e2|
   #  ensure that that e1 occurs before e2.
   #  page.body is the entire content of the page as a string.
-  flunk "Unimplemented"
+  e1_pos = page.body.index(e1)
+  e2_pos = page.body.index(e2)
+  e1_pos.should < e2_pos
 end
 
 # Make it easier to express checking or unchecking several boxes at once
@@ -26,4 +28,20 @@ When /I (un)?check the following ratings: (.*)/ do |uncheck, rating_list|
   # HINT: use String#split to split up the rating_list, then
   #   iterate over the ratings and reuse the "When I check..." or
   #   "When I uncheck..." steps in lines 89-95 of web_steps.rb
+  rating_list.split(%r{\s*,\s*}).each do |name|
+      step %Q{I #{uncheck}check "ratings[#{name}]"}
+  end
+end
+
+Then /I should( not)? see the following movies: (.*)/ do |orNot, movie_list|
+  movie_list.split(%r{\s*,\s*}).each do |movie|
+    step %Q{I should#{orNot} see "#{movie}"}
+  end
+end
+
+Then /I should( not)? see all of the movies/ do |orNot|
+  Movie.all.each do |movie|
+    name = movie[:title]
+    step %Q{I should#{orNot} see "#{name}"}
+  end
 end
